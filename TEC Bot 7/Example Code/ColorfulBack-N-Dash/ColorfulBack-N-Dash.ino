@@ -1,3 +1,23 @@
+// For TEC Bot 7.0 with grbl 1.1 loaded on the Nano V3 co-processor
+// Grbl settings changed from default using the Universal Gcode sender as follows:
+// $100=32 -- For the x axis (left motor) set to 1/16th micro stepping, this makes 100 steps equal to 1 full rotation of the wheel
+// $101=32 -- Same, but for the Y axis (right motor)
+// $110=64000 -- Fastest stable tested speed for 1/16th micro stepping.  Can go faster by selecting different micro stepping (hardware switch)
+// $111=64000 -- Same for Y
+// $120=1000 -- Acceleratin that reliably prevents skipping steps...could push higher
+// $121=1000 -- Same for Y
+// 1/16th micro stepping is selected on the blue hardware switch by switching the 3rd switch on. (Off, Off, On)
+
+// This program sends instructions to grbl and is set with enough time between commands so that grbl doesn't get behind.
+// It is also possible to send much smaller step sizes in a loop.  When grble gets two back to back travel commands, it smoothly
+// accellerates to the new command...so smooth driving can be achieved easily instead of start stop start stop.
+
+// Grbl also keeps the x and y axis coordinated so they start and stop at the same time.  This makes it easy to do smooth turns for example.
+
+// The FastLED library is used instead of the Neopixel library because the Neopixel library conflicts with the m5Stack library somehow
+
+// This example makes the robot back up 7 revolutions and then drive forward quickly 7 revolutions...then repeat.
+
 #include <M5Stack.h>
 #include "FastLED.h"
 
@@ -9,9 +29,9 @@ uint8_t gHue = 0;
 static TaskHandle_t FastLEDshowTaskHandle = 0;
 static TaskHandle_t userTaskHandle = 0;
 
-int dashSpeed = 500; //resulting speed depends on microstep selection on board
-int backingSpeed = 150;
-int driveDistance = 7; //positive numbers are FWD.
+int dashSpeed = 64000; //fast
+int backingSpeed = 10000; //medium
+int driveDistance = 700; //positive numbers are FWD. 100 = 1 full revolution
 int driveRotation = 0;  //positive numbers are CW
 unsigned long timeLastBackedUp = 0;
 int timeSinceBackedUp = 0;
