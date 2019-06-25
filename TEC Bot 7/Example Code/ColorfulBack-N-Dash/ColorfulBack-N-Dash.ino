@@ -30,7 +30,7 @@ static TaskHandle_t FastLEDshowTaskHandle = 0;
 static TaskHandle_t userTaskHandle = 0;
 
 int dashSpeed = 64000; //fast
-int backingSpeed = 10000; //medium
+int backingSpeed = 7000; //slow
 int driveDistance = 700; //positive numbers are FWD. 100 = 1 full revolution
 int driveRotation = 0;  //positive numbers are CW
 unsigned long timeLastBackedUp = 0;
@@ -66,7 +66,7 @@ void setup()
   Serial2.begin(115200, SERIAL_8N1, 16, 17);
   
   //give grbl time to start up on Nano
-  delay(4000); 
+  delay(1000); 
 }
 
 void loop() 
