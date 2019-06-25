@@ -1,19 +1,21 @@
-// For TEC Bot 7.0 with grbl 1.1 loaded on the Nano V3 co-processor
-// Grbl settings changed from default using the Universal Gcode sender as follows:
+// For TEC Bot 7.0 with grbl4bots loaded on the Nano V3 co-processor
+// Grbl settings changed from default as follows
 // $100=32 -- For the x axis (left motor) set to 1/16th micro stepping, this makes 100 steps equal to 1 full rotation of the wheel
 // $101=32 -- Same, but for the Y axis (right motor)
-// $110=64000 -- Fastest stable tested speed for 1/16th micro stepping.  Can go faster by selecting different micro stepping (hardware switch)
-// $111=64000 -- Same for Y
-// $120=1200 -- Acceleratin that reliably prevents skipping steps (turn down for 1/8 microstepping)
-// $121=1200 -- Same for Y
+// $110=63000 -- Fastest stable tested speed for 1/16th micro stepping.  Can go faster by selecting different micro stepping (hardware switch)
+// $111=63000 -- Same for Y
+// $120=980 -- Acceleratin that reliably prevents skipping steps
+// $121=980 -- Same for Y
 // 1/16th micro stepping is selected on the blue hardware switch by switching the 3rd switch on. (Off, Off, On)
-// For faster speeds, you could select 1/8 microstepping (On, On, Off) but be sure to turn down acceleration to somewhere around
-// $120 and $121 = 980 or maybe 910.
+// For faster speeds, you could select 1/8 microstepping (On, On, Off) but then it's possible to skip steps from too much acceleration or speed
+// To use 1/8th microstepping more reliably, the config.h file in the grbl4bots library can be edited to change "DEFAULTS_TB7_16" to "DEFAULTS_TB7_8"
+// For most, just stick with 1/16th microstepping!
 
-// This program sends instructions to grbl and is set with enough time between commands so that grbl doesn't get behind.
+// This program sends instructions to grbl4bots and is set with enough time between commands so that grbl doesn't get behind.
 // It is also possible to send much smaller step sizes in a loop.  When grbl gets two back to back travel commands, it smoothly
 // accellerates to the new command...so smooth driving can be achieved easily instead of start stop start stop.  You can use this to
-// travel continuously at a constant speed.
+// travel continuously at a constant speed.  Sending too many commands to fast can crash the buffer and cause erratic behavior.
+// This will be changed in grbl4bots eventually. (Or you could fix it for us!)
 
 // Grbl also keeps the x and y axis coordinated so they start and stop at the same time.  This makes it easy to do smooth turns for example.
 
@@ -69,20 +71,20 @@ void setup()
 
 void loop() 
 {
-  timeSinceLastTurn=millis()-timeOfLastTurn;
+  timeSinceLastTurn=millis()-timeOfLastTurn; //calculate time since last turn (or time since start)
 
-  if(timeSinceLastTurn>turnInterval)
+  if(timeSinceLastTurn>turnInterval) //if it's time to turn again
   {
-    Serial2.print("\r\n\r\n");
+    Serial2.print("\r\n\r\n"); //wakes up grbl
     delay(2);
-    Serial2.print("$J=G21G91X");
-    Serial2.print(driveDistance+driveRotation);
+    Serial2.print("$J=G21G91X");  //send move command to grbl
+    Serial2.print(driveDistance+driveRotation);  //move left motor this far
     Serial2.print("Y");
-    Serial2.print(driveDistance-driveRotation);
+    Serial2.print(driveDistance-driveRotation);  //move right motor this far
     Serial2.print("F");
-    Serial2.print(forwardSpeed);
-    driveRotation=-driveRotation;
-    timeOfLastTurn=millis();    
+    Serial2.print(forwardSpeed);  //move this fast (acceleration is automatically handled by grbl)
+    driveRotation=-driveRotation;  //flip the direction
+    timeOfLastTurn=millis();    //capture the time we did this turn so we can decide when to do the next one
   }
 }  
 
